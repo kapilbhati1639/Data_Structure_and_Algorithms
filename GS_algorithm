@@ -1,0 +1,65 @@
+import numpy
+
+n = 5
+
+main_list = list(range(1, 2001))
+
+f_list = main_list[::2]
+
+main_men_list = [str(int) for int in f_list]
+m_list = main_list[1::2]
+main_women_list = [str(inti) for inti in m_list]
+m = main_men_list[:n]
+w = main_women_list[:n]
+
+#male_prefer_list = numpy.random.permutation(A)
+pre_m_pref = []
+for i in w:
+    w_prefer_list = numpy.random.permutation(w)
+    pre_m_pref.append(w_prefer_list)
+
+pre_w_pref = []
+for i in w:
+    m_prefer_list = numpy.random.permutation(m)
+    pre_w_pref.append(m_prefer_list)
+m_pref = {key: value for key, value in zip(m, pre_m_pref)}
+w_pref = {key: value for key, value in zip(w, pre_w_pref)}
+
+
+from collections import deque
+
+def prefToRankFunction(pref):   # defining a prefrence to rank the function
+    return {
+        a: {b: idx for idx, b in enumerate(a_pref)}
+        for a, a_pref in pref.items()
+    }
+
+def galeShapleyAlgotithm(*, A, B, A_pref, B_pref):    # Actual algorithm
+    ranking_B = prefToRankFunction(B_pref)
+    ask_list = {a: deque(bs) for a, bs in A_pref.items()}
+    pair = {}
+    leftover_A = set(A)
+    while len(leftover_A) > 0:
+        a = leftover_A.pop()
+        b = ask_list[a].popleft()
+        if b not in pair:
+            pair[b] = a
+        else:
+            a0 = pair[b]
+            b_prefer_a0 = ranking_B[b][a0] < ranking_B[b][a]
+            if b_prefer_a0:
+                leftover_A.add(a)
+            else:
+                leftover_A.add(a0)
+                pair[b] = a
+    #
+    return [(a, b) for b, a in pair.items()]
+
+### implementation of the algorith ### for all n values
+gs_output= galeShapleyAlgotithm(
+    A=m,
+    B=w,
+    A_pref=m_pref,
+    B_pref=w_pref
+)
+print(gs_output)
