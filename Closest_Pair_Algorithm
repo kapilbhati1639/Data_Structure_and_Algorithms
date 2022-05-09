@@ -18,7 +18,7 @@ with open("input.txt", 'r') as fin:       # if the file name is "input.txt"
 # print(points)     # to view the points which were processed through the algorithm
 
 # if you dont have the data in txt, can try the algorithms with this given int tuple list.
-# points = [(20, 4), (9, 8), (5, 10), (4, 4), (2, 0), (18, 21)]
+# points = [(2, 4), (-9, 9), (5, -10), (7, 4), (2, -3), (18, 1)]
 
 
 def mergeSort_1(arre, cordnts):
