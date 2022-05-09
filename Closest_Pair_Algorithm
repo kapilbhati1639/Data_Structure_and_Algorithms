@@ -1,1 +1,137 @@
+import math as mt
+# if sourcing the input from a txt in the format:
+#  a b #point 1
+#  c d # point 2 etc.
+#  e f
+#  g h
+points = []
 
+with open("input.txt", 'r') as fin:       # if the file name is "input.txt"
+    for lin in fin:
+        lin = lin.strip()
+        alist = lin.split(" ")
+        if len(alist) != 2:
+            continue
+
+        tup = (int(alist[0]), int(alist[1]))
+        points.append(tup)
+# print(points)     # to view the points which were processed through the algorithm
+
+# if you dont have the data in txt, can try the algorithms with this given int tuple list.
+# points = [(20, 4), (9, 8), (5, 10), (4, 4), (2, 0), (18, 21)]
+
+
+def mergeSort_1(arre, cordnts):
+    if len(arre) == 1:
+        return arre
+
+    mid = len(arre) // 2
+    pointsleft = arre[:mid]
+    pointsright = arre[mid:]
+
+    left_sorted = mergeSort_1(pointsleft, cordnts)
+    right_sorted = mergeSort_1(pointsright, cordnts)
+    cmbo = merge_2(left_sorted, right_sorted, cordnts)
+    return cmbo
+
+
+def merge_2(A, B, coord):
+    i = j = 0
+    C = []
+
+    if coord == 'x':
+        coord = 0
+    elif coord == 'y':
+        coord = 1
+
+    while i < len(A) and j < len(B):
+        if A[i][coord] <= B[j][coord]:
+            C.append(A[i])
+            i += 1
+
+        elif B[j][coord] < A[i][coord]:
+            C.append(B[j])
+            j += 1
+
+    while i < len(A) and j == len(B):
+        C.append(A[i])
+        i += 1
+
+    while j < len(B) and i == len(A):
+        C.append(B[j])
+        j += 1
+
+    return C
+
+
+def sortFirst(points):
+    Px = mergeSort_1(points, 'x')
+    Py = mergeSort_1(points, 'y')
+    return Px, Py
+
+
+Px, Py = sortFirst(points)
+
+
+def dist_btw_pts(p1, p2):
+    return mt.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+
+
+def bruteForcef(arry):
+    size = len(arry)
+    minimum_distance = dist_btw_pts(arry[0], arry[1])
+    target_pair = (arry[0], arry[1])
+
+    if len(arry) == 2:
+        return dist_btw_pts(arry[0], arry[1]), arry[0], arry[1]
+
+    for i in range(0, size):
+        for j in range(i + 1, size):
+            distance = dist_btw_pts(arry[i], arry[j])
+            if distance < minimum_distance:
+                minimum_distance = distance
+                target_pair = (arry[i], arry[j])
+
+    return minimum_distance, target_pair
+
+
+def closestPointsPair(Px, Py):
+    if len(Px) <= 3:
+        return bruteForcef(Px)
+
+    midpoint_x = len(Px) // 2
+    Qx = Px[:midpoint_x]
+    Rx = Px[midpoint_x:]
+    median_x = Px[midpoint_x]
+    Qy, Ry = [], []
+
+    for point in Py:
+        if point[0] < int(median_x[0]):
+            Qy.append(point)
+        else:
+            Ry.append(point)
+
+    minDistanceLeft = closestPointsPair(Qx, Qy)
+    minDistanceRight = closestPointsPair(Rx, Ry)
+    distanceMin = min(minDistanceLeft, minDistanceRight)
+    x_bar = Qx[-1][0]
+    Sy = []
+
+    for y in Py:
+        if x_bar - distanceMin[0] < y[0] < x_bar + distanceMin[0]:
+            Sy.append(y)
+
+    for i in range(len(Sy) - 1):
+        for j in range(i + 1, min(i + 7, len(Sy))):
+            points = Sy[i]
+            points_close = Sy[j]
+            dist = dist_btw_pts(points, points_close)
+
+            if dist < distanceMin[0]:
+                distanceMin = (dist, points, points_close)
+
+    return distanceMin
+
+
+print(closestPointsPair(Px, Py))  # print out the distance and the closest pair of points (d , pair)
+print(int(closestPointsPair(Px, Py)[0]))  ## distance in int format
